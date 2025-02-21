@@ -1,0 +1,15 @@
+# Ignore typical Nextflow files
+*.nextflow*
+.nextflow/
+.nextflow.log
+.nextflow.history
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.bak
+*.log
+
+# Ignore directories
+work/
+results/
