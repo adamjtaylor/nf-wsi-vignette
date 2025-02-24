@@ -54,10 +54,6 @@ model_dir = sys.argv[2]
 print(f"WSI Path: {wsi_path}")
 print(f"Device: {device}")
 
-print("Logging into Hugging Face Hub")
-login("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")
-
-
 os.environ["HF_HOME"] = model_dir
 
 print("Downloading the model")
