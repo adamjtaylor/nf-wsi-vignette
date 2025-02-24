@@ -9,5 +9,16 @@ params.outdir = 'results'
 
 workflow {
     samplesheet_ch = Channel.fromPath(params.samplesheet)
-    IMAGE_ANALYSIS(samplesheet_ch)
+        // Split samplesheet and create channel
+    image_ch = samplesheet_ch
+        .splitCsv(header:true)
+        .map {
+                row ->
+                def meta = [:]
+                meta.id = file(row.image).simpleName
+                meta.basename = file(row.image).baseName
+                image = file(row.image)
+                [meta, image]                
+            }
+    IMAGE_ANALYSIS(image_ch)
 }

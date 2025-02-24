@@ -9,20 +9,10 @@ include { REPORT } from '../modules/report'
 
 workflow IMAGE_ANALYSIS {
     take:
-    samplesheet_ch
+    image_ch
 
     main:
-    // Split samplesheet and create channel
-    image_ch = samplesheet_ch
-        .splitCsv(header:true)
-        .map {
-                row ->
-                def meta = [:]
-                meta.id = file(row.image).simpleName
-                meta.basename = file(row.image).baseName
-                image = file(row.image)
-                [meta, image]                
-            }
+
     // Run GRAND_QC
     GRAND_QC(image_ch)
 
