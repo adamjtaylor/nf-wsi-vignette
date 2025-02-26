@@ -78,11 +78,10 @@ The pipeline generates:
 
 The following is the command line output following an example stub run
 
-```sh
-(grandqc) ataylor@ajt-mbp nf-wsi-vignette % nextflow run main.nf --samplesheet test_data/samplesheet.csv -profile conda,local --grand_qc true --foundation true -stub
-Nextflow 24.10.4 is available - Please consider updating your version to it
+```
+(base) ataylor@ajt-mbp nf-wsi-vignette % nextflow run main.nf --samplesheet test_data/samplesheet.csv -profile conda,local --grand_qc true --foundation true -stub
 
- N E X T F L O W   ~  version 24.10.0
+ N E X T F L O W   ~  version 24.10.4
 
 Launching `main.nf` [magical_payne] DSL2 - revision: d7073144b0
 
