@@ -1,9 +1,10 @@
-process GRAND_QC {
+process GRAND_QC_RUN {
 
     container "ghcr.io/adamjtaylor/grandqc:latest"
     conda "/Users/ataylor/mambaforge/envs/grandqc"
+    maxForks 2
 
-    //publishDir "results/${meta.id}/grand_qc/", mode: 'copy'
+    publishDir "${params.outdir}/${meta.id}/grand_qc/", mode: 'copy'
 
     input:
     tuple val(meta), path(image)
@@ -45,6 +46,8 @@ process GRAND_QC {
 
     stub:
     """
+    mkdir -p output_images
+    cd output_images
     mkdir -p maps_qc mask_qc overlays_qc tis_det_mask tis_det_mask_col tis_det_overlay tis_det_thumbnail
     touch maps_qc/${meta.id}_map_QC.png
     touch mask_qc/${meta.id}_mask.png

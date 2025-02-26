@@ -13,9 +13,12 @@
 # Ignore directories
 work/
 results/
+scratch/
 
 # Ignore cpython files
 *.cpython*
 
 # Ignore .DS_Store files
 .DS_Store
+
+#

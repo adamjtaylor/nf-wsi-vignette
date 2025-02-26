@@ -1,10 +1,15 @@
 process GRAND_QC_REPORT {
-    publishDir "results/${meta.id}/report/", mode: 'copy'
+    publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
     tuple val(meta), 
-    path(qc_map), 
-    path (qc_mask),
-    path(qc_overlay), path(tissue_mask_colored), path(tissue_overlay), path(thumbnail), path(stats), path(metrics)
+        path(qc_map), 
+        path (qc_mask),
+        path(qc_overlay), 
+        path(tissue_mask_colored), 
+        path(tissue_overlay), 
+        path(thumbnail), 
+        path(stats), 
+        path(metrics)
 
     output:
     path 'qc_report.md'
@@ -83,13 +88,36 @@ helps ensure that image data is well-characterized for downstream analysis.
 
 ## Tissue Mask
 
-|:-:|:-:|
-| ![Tissue Mask Colored](images/\$(basename ${tissue_mask_colored})) { width=400 }  | ![Tissue Overlay](images/\$(basename ${tissue_overlay})) { width=840 }  |
+<div style="display: flex; gap: 10px; align-items: flex-start;">
+    <figure>
+        <img src="images/\$(basename ${tissue_mask_colored})" width="400" alt="Tissue Mask">
+        <figcaption>Tissue Mask</figcaption>
+    </figure>
+    <figure>
+        <img src="images/\$(basename ${tissue_overlay})" width="400" alt="Tissue Mask Overlay">
+        <figcaption>Tissue Overlay</figcaption>
+    </figure>
+</div>
 
 ## Artefact Map
+<div style="display: flex; gap: 20px; align-items: flex-start;">
+    <figure>
+        <img src="images/\$(basename ${qc_map})" width="400" alt="QC Map">
+        <figcaption>QC Map</figcaption>
+    </figure>
+    <figure>
+        <img src="images/\$(basename ${qc_overlay})" width="400" alt="QC Overlay">
+        <figcaption>QC Overlay</figcaption>
+    </figure>
+</div>
 
-|:-:|:-:|:-|
-| ![QC Map](images/\$(basename ${qc_map})) { width=400 } | ![QC Overlay](images/\$(basename ${qc_overlay})) { width=400 } | <span style="display:inline-block; width:20px; height:20px; background-color:rgb(255,255,255);"></span> Background (White) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(128,128,128);"></span> Usable Tissue (Gray) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(255,99,71);"></span> Tissue Folds (Orange) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(0,255,0);"></span> Dark Spots & Foreign Objects (Lime) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(255,0,0);"></span> Pen Markings (Red) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(255,0,255);"></span> Air Bubbles / Slide Edge (Magenta) <br> <span style="display:inline-block; width:20px; height:20px; background-color:rgb(75,0,130);"></span> Out of Focus (Indigo) |
+<span style="color: #FFFFFF;">&#9632;</span> Background (White) | 
+<span style="color: #808080;">&#9632;</span> Usable Tissue (Gray) |
+<span style="color: #FF6347;">&#9632;</span> Tissue Folds (Orange) |
+<span style="color: #00FF00;">&#9632;</span> Dark Spots & Foreign Objects (Lime) |
+<span style="color: #FF0000;">&#9632;</span> Pen Markings (Red) |
+<span style="color: #FF00FF;">&#9632;</span> Air Bubbles / Slide Edge (Magenta) |
+<span style="color: #4B0082;">&#9632;</span> Out of Focus (Indigo)
 
 ## Methods  
 
@@ -100,5 +128,12 @@ Whole-slide images (WSIs) for sample **${meta.id}** were analyzed using GrandQC,
 
 GrandQC models were selected based on the optimal balance of accuracy and efficiency, with analysis performed at 7x magnification. The outputs include segmented tissue masks and artifact maps, which provide insights into potential issues affecting image integrity.
 EOF
+"""
+
+stub:
+"""
+touch qc_report.md
+mkdir -p images
+touch images/thumbnail.png
 """
 }
