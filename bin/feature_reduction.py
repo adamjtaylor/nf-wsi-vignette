@@ -5,6 +5,7 @@ import numpy as np
 import sys
 from tiatoolbox.wsicore.wsireader import WSIReader
 from tiatoolbox.tools import patchextraction
+from tiatoolbox.models.engine.patch_predictor import PatchPredictor
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import igraph as ig
@@ -13,6 +14,14 @@ import leidenalg as la
 wsi_path = sys.argv[1]
 features_path = sys.argv[2]
 positions_path = sys.argv[3]
+model = sys.argv[4]
+model = "H-optimus-0"
+
+# if the model is prov-gigapath then patch shape is 256x256
+if model == "Prov-GigaPath":
+    patch_shape = [256, 256]
+else:
+    patch_shape = [224, 224]
 
 # Configure matplotlib
 mpl.rcParams["figure.dpi"] = 300  # for high resolution figure in notebook
@@ -39,7 +48,7 @@ def umap_reducer(x: np.ndarray, dims: int = 3, nns: int = 10) -> np.ndarray:
 # load the features output by our feature extractor
 pos = np.load(positions_path)
 # add 122 to the x and y positions to center the patches
-pos += 122
+pos += 112
 
 
 print(f"Positions: {pos.shape[0]}")
@@ -62,20 +71,20 @@ overview_resolution = (
 # the unit of the `resolution` parameter. Can be "power", "level", "mpp", or "baseline"
 overview_unit = "mpp"
 wsi = WSIReader.open(wsi_path)
+print("Generating overview")
 wsi_overview = wsi.slide_thumbnail(resolution=overview_resolution, units=overview_unit)
-plt.figure(), plt.imshow(wsi_overview)
+print("Overview generated")
+plt.figure()
+plt.imshow(wsi_overview)
 plt.axis("off")
-
-plt.savefig("overview.png")
+plt.savefig("overview.png", bbox_inches="tight", pad_inches=0)
 
 # plot the feature map reduction
 plt.figure()
 plt.imshow(wsi_overview)
 plt.scatter(pos[:, 0], pos[:, 1], c=reduced, s=5, alpha=0.7)
 plt.axis("off")
-plt.title("UMAP feature embedding")
-plt.savefig("umap_overlay.png")
-
+plt.savefig("umap_overlay.png", bbox_inches="tight", pad_inches=0)
 
 reduced_2d, graph2d = umap_reducer(feats, dims=2)
 
@@ -103,11 +112,27 @@ def leiden_clustering(igraph_graph, resolution=1.0):
     return np.array(partition.membership)  # Return cluster labels
 
 
-# Run Leiden
-labels = leiden_clustering(igraph_graph, resolution=0.5)
+# Initial resolution
+resolution = 0.5
+
+# Run Leiden clustering
+labels = leiden_clustering(igraph_graph, resolution=resolution)
+num_clusters = len(np.unique(labels))
+
+# Reduce resolution incrementally until we get <= 5 clusters
+while num_clusters > 5 and resolution > 0.1:
+    resolution -= 0.1
+    labels = leiden_clustering(igraph_graph, resolution=resolution)
+    num_clusters = len(np.unique(labels))
+
+# If we don't have enough clusters, increase resolution
+while num_clusters < 5 and resolution < 1.0:
+    resolution += 0.1
+    labels = leiden_clustering(igraph_graph, resolution=resolution)
+    num_clusters = len(np.unique(labels))
+
 plt.figure()
 plt.scatter(reduced_2d[:, 0], reduced_2d[:, 1], c=labels, cmap="tab10", s=1, alpha=0.9)
-plt.show()
 plt.savefig("leiden_clusters_umap.png")
 
 # plot the feature map reduction
@@ -115,8 +140,7 @@ plt.figure()
 plt.imshow(wsi_overview)
 plt.scatter(pos[:, 0], pos[:, 1], c=labels, cmap="tab10", s=5, alpha=0.9)
 plt.axis("off")
-
-plt.savefig("leiden_clusters_overlay.png")
+plt.savefig("leiden_clusters_overlay.png", bbox_inches="tight", pad_inches=0)
 
 
 def select_representative_nodes(
@@ -183,7 +207,7 @@ def select_representative_nodes(
 
 # Select randomly sampled patches from the graph
 patch_indices = select_representative_nodes(
-    igraph_graph, labels, method="random", n_patches=5
+    igraph_graph, labels, method="degree", n_patches=5
 )
 
 # 1. Build flattened lists for both selected indices and annotation labels
@@ -200,20 +224,47 @@ selected_indices = selected_indices.astype(int)
 
 # 2. (Optional) Convert WSI overview to grayscale and dim it
 wsi_greyscale = np.mean(wsi_overview, axis=-1)  # Convert to grayscale
+# as rgb so it renders correcrly
+wsi_greyscale = np.stack([wsi_greyscale] * 3, axis=-1)
 wsi_dimmed = wsi_greyscale * 0.6  # Dim by reducing brightness
 
 # 3. Plot the WSI (dimmed grayscale or original RGB) and scatter the selected points
 plt.figure(figsize=(5, 5))
-# plt.imshow(wsi_dimmed, cmap="gray", alpha=0.9)  # Option: show dimmed grayscale
+# plt.imshow(wsi_greyscale, cmap="gray", alpha=0.9)  # Option: show dimmed grayscale
 plt.imshow(wsi_overview, alpha=0.5)  # Showing the original WSI, semi-transparent
 
-scatter = plt.scatter(
+plt.scatter(
     pos[selected_indices, 0],
     pos[selected_indices, 1],
     c=labels[selected_indices],
     cmap="tab10",
-    s=4,
+    s=8,
 )
+
+import string
+
+# Generate labels (A-Z, then 0-9 if needed)
+num_points = len(selected_indices)
+if num_points <= 26:
+    labels_text = string.ascii_uppercase[:num_points]
+else:
+    labels_text = list(string.ascii_uppercase) + [
+        str(i) for i in range(num_points - 26)
+    ]
+
+
+# Annotate each point inside the circle
+for i, loc in enumerate(pos[selected_indices]):
+    plt.text(
+        loc[0],
+        loc[1],
+        labels_text[i],
+        fontsize=3,
+        ha="center",
+        va="center",
+        color="white",
+        weight="bold",
+    )
 
 # 4. Annotate each point with its "clusterID.indexWithinCluster" label
 #    (offset the text slightly so it's easier to read)
@@ -237,17 +288,7 @@ scatter = plt.scatter(
 
 # 5. Final plot styling
 plt.axis("off")
-plt.show()
-
-plt.savefig("selected_patches_overlay.png")
-
-
-# Load WSI
-wsi = WSIReader.open(wsi_path)
-
-# Check WSI dimensions
-wsi_size = wsi.info.slide_dimensions
-print(f"WSI Full-Resolution Dimensions: {wsi_size}")
+plt.savefig("selected_patches_overlay.png", bbox_inches="tight", pad_inches=0)
 
 # Convert pos to full-resolution coordinates
 scaling_factor = 4 / 0.5  # Calculate scaling factor based on mpp values
@@ -272,15 +313,17 @@ for cluster in clusters:
     # Use pre-selected indices instead of random sampling
     selected_indices = np.array(patch_indices[cluster])  # Corrected variable name
     patch_centroids = pos8[selected_indices, :2]  # Ensure correct shape
+    # add half of patch_shape to get the center of the patch
+    patch_centroids += np.array(patch_shape) // 2
 
     # Use TIAToolbox patch extractor
     patch_extractor = patchextraction.get_patch_extractor(
         input_img=wsi,
         locations_list=patch_centroids,
         method_name="point",
-        patch_size=(244, 244),
-        resolution=0,
-        units="level",
+        patch_size=patch_shape,
+        resolution=0.5,
+        units="mpp",
     )
 
     patches_per_cluster[cluster] = list(patch_extractor)  # Store extracted patches
@@ -321,7 +364,11 @@ if num_clusters == 1:
     axes = [axes]
 
 # Define colormap
-cmap = mpl.cm.get_cmap("tab20", num_clusters)
+cmap = plt.get_cmap("tab20", num_clusters)
+
+patch_counter = 0
+
+print("Plotting extracted patches...")
 
 # Plot extracted patches per cluster and add labels
 for row, (cluster, patches) in enumerate(patches_per_cluster.items()):
@@ -340,14 +387,95 @@ for row, (cluster, patches) in enumerate(patches_per_cluster.items()):
         )
 
         ax.imshow(framed_patch)
+        # Add a patch label to the patch based on labels_text
+        # label_text is the number of patches wide
+        # label should be top left corner on  the patch
+        ax.text(
+            0, -15, labels_text[patch_counter], fontsize=6, color="black", weight="bold"
+        )
+        if col == 0:
+            ax.text(
+                -50,
+                250,
+                f"Cluster {cluster}",
+                fontsize=6,
+                rotation=90,
+                weight="bold",
+            )
         ax.axis("off")
+        patch_counter += 1
 
     # Add cluster label on the leftmost image in each row
     axes[row, 0].set_ylabel(
         f"Cluster {cluster}", fontsize=12, rotation=90, labelpad=20, weight="bold"
     )
 
-plt.tight_layout()
-plt.show()
 
-plt.savefig("extracted_patches.png")
+plt.tight_layout()
+plt.savefig("extracted_patches.png", bbox_inches="tight", pad_inches=0.2)
+
+
+# Try merging predictions
+print("Merging predictions...")
+output = {
+    "resolution": 1,
+    "units": "baseline",
+    "predictions": labels + 1,
+    "coordinates": pos,
+}
+
+merged = PatchPredictor.merge_predictions(
+    wsi_overview, output, resolution=4, units="baseline"
+)
+merged -= 1
+# in merged set zero to be null
+merged[merged == -1] = np.nan
+
+cmap = plt.get_cmap("tab10").copy()  # Copy to modify safely
+cmap.set_bad(color=(0, 0, 0, 0))  # RGBA: fully transparent
+
+# plot the feature map reduction
+plt.figure()
+plt.imshow(wsi_overview)
+plt.imshow(merged, alpha=0.7, cmap=cmap)
+plt.axis("off")
+plt.savefig("cluster_overlay_merged.png", bbox_inches="tight", pad_inches=0)
+
+output = {
+    "resolution": 1,
+    "units": "baseline",
+    "predictions": list(range(1, len(labels) + 1)),
+    "coordinates": pos,
+}
+
+merged = PatchPredictor.merge_predictions(
+    wsi_overview, output, resolution=4, units="baseline"
+)
+
+# Ensure merged is an integer array
+merged_int = np.nan_to_num(merged, nan=0).astype(int)
+
+# Create a semi-transparent RGBA image (float32 to match reduced's 0-1 scale)
+filled = np.zeros((*merged_int.shape, 4), dtype=np.float32)  # Default fully transparent
+
+# Mask valid indices (ignore background values)
+valid_mask = merged_int > 0
+
+# Convert to 0-based indexing
+valid_indices = merged_int[valid_mask] - 1
+valid_indices = np.clip(
+    valid_indices, 0, len(reduced) - 1
+)  # Prevent out-of-bounds errors
+
+# Assign RGB values from reduced (already 0-1 scaled)
+filled[valid_mask, :3] = reduced[valid_indices]  # No need for scaling
+
+# Set alpha to 0.5 (semi-transparent) for valid pixels
+filled[valid_mask, 3] = 0.7  # 50% transparency
+
+
+plt.figure()
+plt.imshow(wsi_overview)  # Base image
+plt.imshow(filled)  # Overlay with 50% transparency
+plt.axis("off")
+plt.savefig("umap_overlay_merged.png", bbox_inches="tight", pad_inches=0)

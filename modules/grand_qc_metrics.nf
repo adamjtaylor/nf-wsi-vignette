@@ -27,3 +27,36 @@ process GRAND_QC_METRICS {
     """
 
 }
+
+process GRAND_QC_METRICS_MERGE {
+
+
+    publishDir "${params.outdir}", mode: 'copy'
+    container 'ubuntu:jammy'
+
+    input:
+    path results, stageAs: "?/*.json"
+
+    output:
+    path 'merged_results.json'
+
+    script:
+    """
+    echo '[' > merged_results.json
+    first=true
+    for json in \$(ls -1 ${results} | sort); do
+        if [ "\$first" = true ]; then
+            first=false
+        else
+            echo ',' >> merged_results.json
+        fi
+        cat \$json >> merged_results.json
+    done
+    echo ']' >> merged_results.json
+    """
+
+    stub:
+    """
+    touch merged_results.json
+    """
+}

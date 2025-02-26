@@ -1,10 +1,15 @@
 process GRAND_QC_REPORT {
-    publishDir "results/${meta.id}/report/", mode: 'copy'
+    publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
     tuple val(meta), 
-    path(qc_map), 
-    path (qc_mask),
-    path(qc_overlay), path(tissue_mask_colored), path(tissue_overlay), path(thumbnail), path(stats), path(metrics)
+        path(qc_map), 
+        path (qc_mask),
+        path(qc_overlay), 
+        path(tissue_mask_colored), 
+        path(tissue_overlay), 
+        path(thumbnail), 
+        path(stats), 
+        path(metrics)
 
     output:
     path 'qc_report.md'
@@ -123,5 +128,12 @@ Whole-slide images (WSIs) for sample **${meta.id}** were analyzed using GrandQC,
 
 GrandQC models were selected based on the optimal balance of accuracy and efficiency, with analysis performed at 7x magnification. The outputs include segmented tissue masks and artifact maps, which provide insights into potential issues affecting image integrity.
 EOF
+"""
+
+stub:
+"""
+touch qc_report.md
+mkdir -p images
+touch images/thumbnail.png
 """
 }
