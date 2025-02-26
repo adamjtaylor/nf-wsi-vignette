@@ -73,3 +73,47 @@ The pipeline generates:
 - QC metrics and reports
 - Foundation model embeddings
 - Clustering results
+
+## Example Run
+
+The following is the command line output following an example stub run
+
+```sh
+(grandqc) ataylor@ajt-mbp nf-wsi-vignette % nextflow run main.nf --samplesheet test_data/samplesheet.csv -profile conda,local --grand_qc true --foundation true -stub
+Nextflow 24.10.4 is available - Please consider updating your version to it
+
+ N E X T F L O W   ~  version 24.10.0
+
+Launching `main.nf` [magical_payne] DSL2 - revision: d7073144b0
+
+
+---------------
+NF-WSI-VIGNETTE
+---------------
+Adam J. Taylor
+Sage Bionetworks
+---------------
+Generating QC reports and feature embeddings for whole slide images
+-----------------------------------------------------------------
+params:
+    samplesheet          : test_data/samplesheet.csv
+    outdir               : results
+    grandqc              : true
+    foundation           : true
+    foundation_model     : H-optimus-0
+    huggingface_hub_path : /Users/ataylor/.cache/huggingface
+
+profile: conda,local
+-----------------------------------------------------------------
+
+executor >  local (55)
+[0b/994fd0] process > GRAND_QC:GRAND_QC_RUN (6)        [100%] 9 of 9 ✔
+[77/cfc9fc] process > GRAND_QC:GRAND_QC_METRICS (9)    [100%] 9 of 9 ✔
+[2a/731da7] process > GRAND_QC:GRAND_QC_METRICS_MERGE  [100%] 1 of 1 ✔
+[73/a1fb8c] process > GRAND_QC:GRAND_QC_REPORT (9)     [100%] 9 of 9 ✔
+[fe/7528a6] process > TIA_TOOLBOX:EMBEDDING (2)        [100%] 9 of 9 ✔
+[8c/c8ef2b] process > TIA_TOOLBOX:CLUSTERING (9)       [100%] 9 of 9 ✔
+[24/29345b] process > TIA_TOOLBOX:EMBEDDING_REPORT (9) [100%] 9 of 9 ✔
+
+(grandqc) ataylor@ajt-mbp nf-wsi-vignette % 
+```
