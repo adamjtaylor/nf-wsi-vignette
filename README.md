@@ -79,7 +79,9 @@ The pipeline generates:
 The following is the command line output following an example stub run
 
 ```
-(base) ataylor@ajt-mbp nf-wsi-vignette % nextflow run main.nf --samplesheet test_data/samplesheet.csv -profile conda,local --grand_qc true --foundation true -stub
+(base) ataylor@ajt-mbp nf-wsi-vignette % nextflow run main.nf \
+    --samplesheet test_data/samplesheet.csv -grand_qc true --foundation true \
+    -profile conda,local --stub
 
  N E X T F L O W   ~  version 24.10.4
 
