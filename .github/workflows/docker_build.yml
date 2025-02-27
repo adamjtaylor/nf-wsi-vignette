@@ -48,7 +48,8 @@ jobs:
       - name: Build and push to GHCR
         uses: docker/build-push-action@v4
         with:
-          context: ./docker/grandqc
+          context: .
+          file: ./docker/grandqc/Dockerfile
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
@@ -91,7 +92,8 @@ jobs:
      - name: Build and push to GHCR
        uses: docker/build-push-action@v4
        with:
-         context: ./docker/tiatoolbox
+         context: .
+         file: ./docker/grandqc/Dockerfile
          push: true
          tags: ${{ steps.metadata.outputs.tags }}
          labels: ${{ steps.metadata.outputs.labels }}

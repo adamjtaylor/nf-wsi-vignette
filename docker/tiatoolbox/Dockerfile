@@ -1,5 +1,5 @@
 FROM mambaorg/micromamba:1.5.10-noble
-COPY --chown=$MAMBA_USER:$MAMBA_USER ../../../conda/tiatoolbox.yml /tmp/conda.yml
+COPY --chown=$MAMBA_USER:$MAMBA_USER conda/tiatoolbox.yml /tmp/conda.yml
 RUN micromamba install -y -n base -f /tmp/conda.yml \
     && micromamba install -y -n base conda-forge::procps-ng \
     && micromamba env export --name base --explicit > environment.lock \
