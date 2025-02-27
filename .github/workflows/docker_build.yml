@@ -86,7 +86,7 @@ jobs:
            type=semver,pattern={{major}}
            type=ref,event=branch
            type=sha
-           lates
+           latest
 
      - name: Build and push to GHCR
        uses: docker/build-push-action@v4
