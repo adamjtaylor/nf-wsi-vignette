@@ -36,7 +36,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/grandqc
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}} 
@@ -48,7 +48,7 @@ jobs:
       - name: Build and push to GHCR
         uses: docker/build-push-action@v4
         with:
-          context: ./docker
+          context: ./docker/grandqc
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
@@ -79,7 +79,7 @@ jobs:
        id: metadata
        uses: docker/metadata-action@v4
        with:
-         images: ${{ env.REGISTRY }}/${{ github.repository }}
+         images: ${{ env.REGISTRY }}/${{ github.repository }}/tiatoolbox
          tags: |
            type=semver,pattern={{version}}
            type=semver,pattern={{major}}.{{minor}} 
@@ -91,7 +91,7 @@ jobs:
      - name: Build and push to GHCR
        uses: docker/build-push-action@v4
        with:
-         context: ./docker
+         context: ./docker/tiatoolbox
          push: true
          tags: ${{ steps.metadata.outputs.tags }}
          labels: ${{ steps.metadata.outputs.labels }}
