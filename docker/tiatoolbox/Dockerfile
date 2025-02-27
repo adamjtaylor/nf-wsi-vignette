@@ -6,6 +6,7 @@ RUN micromamba install -y -n base -f /tmp/conda.yml \
     && echo ">> CONDA_LOCK_START" \
     && cat environment.lock \
     && echo "<< CONDA_LOCK_END" \
-    && micromamba clean -a -y
+    && micromamba clean -a -y \
+    && run apt-get update && apt-get install -y libgl1 \
 USER root
 ENV PATH="$MAMBA_ROOT_PREFIX/bin:$PATH"
