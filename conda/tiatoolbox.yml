@@ -163,8 +163,7 @@ dependencies:
   - libffi=3.4.2
   - libgettextpo=0.23.1
   - libgettextpo-devel=0.23.1
-  - libgfortran=5.0.0
-  - libgfortran5=13.2.0
+  - libgfortran5=14.2.0
   - libglib=2.82.2
   - libhwloc=2.11.2
   - libiconv=1.18
