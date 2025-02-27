@@ -6,4 +6,3 @@ dependencies:
   - opencv>=4.8.0
   - tiatoolbox=1.6.0
   - torch
-  - cudatoolkit
