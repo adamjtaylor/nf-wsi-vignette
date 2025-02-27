@@ -19,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: "./docker/grandqc"
+        working-directory: "./docker/grandqc/"
 
     steps:
       - name: Checkout GitHub Action
@@ -62,7 +62,7 @@ jobs:
 
     defaults:
         run:
-            working-directory: "./docker/tiatoolbox"
+            working-directory: "./docker/tiatoolbox/"
 
     steps:
      - name: Checkout GitHub Action
