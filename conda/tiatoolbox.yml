@@ -5,5 +5,5 @@ dependencies:
   - huggingface_hub=0.29.1
   - opencv>=4.8.0
   - tiatoolbox=1.6.0
-  - torch==2.0.1
-  - cudatoolkit=11.7
+  - torch
+  - cudatoolkit
