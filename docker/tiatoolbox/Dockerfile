@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     openslide-tools \
     libgl1 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir tiatoolbox huggingface-hub
+RUN pip install --no-cache-dir tiatoolbox huggingface-hub igraph leidenalg
 
 # activate virtual environment
 ENV VIRTUAL_ENV=/opt/venv
