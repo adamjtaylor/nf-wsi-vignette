@@ -1,5 +1,5 @@
 process GRAND_QC_GET_MODELS {
-    container 'ubuntu:jammy'
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
     
     output:
     tuple path("td"), path("qc"), emit: grand_qc_models
