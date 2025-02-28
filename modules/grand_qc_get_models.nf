@@ -1,5 +1,5 @@
 process GRAND_QC_GET_MODELS {
-    container 'alpine'
+    container 'ubuntu:jammy'
     
     output:
     tuple path("td"), path("qc"), emit: grand_qc_models
