@@ -2,7 +2,7 @@ process GRAND_QC_RUN {
 
     container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
     conda "/Users/ataylor/mambaforge/envs/grandqc"
-    maxForks 2
+    label 'GPU'
 
     publishDir "${params.outdir}/${meta.id}/grand_qc/", mode: 'copy'
 

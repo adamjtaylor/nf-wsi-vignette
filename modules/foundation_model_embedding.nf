@@ -2,7 +2,7 @@ process EMBEDDING {
     container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
     containerOptions '-v ~/.cache/huggingface:/root/.cache/huggingface'
     conda "/Users/ataylor/mambaforge/envs/tiatoolbox"
-    
+    label 'GPU'
     secret 'HF_TOKEN'
     
     publishDir "results/${meta.id}/foundation_model", mode: 'copy', pattern: "*.{npy,dat}"
