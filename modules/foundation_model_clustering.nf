@@ -1,7 +1,6 @@
 process CLUSTERING {
 
-    //container 'ghcr.io/tissueimageanalytics/tiatoolbox:1.6.0-py3.11-debian'
-    container 'tiatoolbox-local-arm64'
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
     conda "/Users/ataylor/mambaforge/envs/tiatoolbox"
 
 

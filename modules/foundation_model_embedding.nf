@@ -1,12 +1,11 @@
 process EMBEDDING {
-
-    //container 'ghcr.io/tissueimageanalytics/tiatoolbox:1.6.0-py3.11-debian'
-    container 'tiatoolbox-local-arm64'
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
     containerOptions '-v ~/.cache/huggingface:/root/.cache/huggingface'
     conda "/Users/ataylor/mambaforge/envs/tiatoolbox"
+    
     secret 'HF_TOKEN'
+    
     publishDir "results/${meta.id}/foundation_model", mode: 'copy', pattern: "*.{npy,dat}"
-    memory 24.GB
 
     input:
     tuple val(meta), path(image)

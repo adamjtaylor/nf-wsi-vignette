@@ -1,5 +1,6 @@
 process GRAND_QC_METRICS {
 
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
     conda "/Users/ataylor/mambaforge/envs/grandqc"
 
     input:

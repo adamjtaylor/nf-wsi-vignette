@@ -1,4 +1,6 @@
 process GRAND_QC_REPORT {
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
+
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
     tuple val(meta), 
