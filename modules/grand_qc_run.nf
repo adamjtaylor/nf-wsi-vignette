@@ -8,12 +8,15 @@ process GRAND_QC_RUN {
 
     input:
     tuple val(meta), path(image)
+    tuple path(td_model_dir), path(qc_model_dir)
 
     output:
     tuple val(meta), 
     path("output_images/maps_qc/*"), 
     path("output_images/mask_qc/*"), 
     path("output_images/overlays_qc/*"), 
+    // Not outputting the tissue mask for now as it has a clash with the QC mask
+    // as Nextflow has case-insensitive file paths and it has the same name
     //path("output_images/tis_det_mask/*"), 
     path("output_images/tis_det_mask_col/*"), 
     path("output_images/tis_det_overlay/*"), 
@@ -31,7 +34,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/wsi_tis_detect.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${projectDir}/grandqc/models/td/
+        --model_dir ${td_model_dir}
 
     echo "Tissue detection complete"
 
@@ -39,7 +42,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/main.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${projectDir}/grandqc/models/qc/
+        --model_dir ${qc_model_dir}
 
     echo "QC model complete"
     """

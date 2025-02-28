@@ -1,3 +1,4 @@
+include { GRAND_QC_GET_MODELS } from '../modules/grand_qc_get_models'
 include { GRAND_QC_RUN } from '../modules/grand_qc_run'
 include { GRAND_QC_METRICS } from '../modules/grand_qc_metrics'
 include { GRAND_QC_METRICS_MERGE } from '../modules/grand_qc_metrics'
@@ -9,8 +10,11 @@ workflow GRAND_QC {
 
     main:
 
+    // Get the models
+    GRAND_QC_GET_MODELS()
+
     // Run GRAND_QC
-    GRAND_QC_RUN(image_ch)
+    GRAND_QC_RUN(image_ch, GRAND_QC_GET_MODELS.out.grand_qc_models)
 
     GRAND_QC_METRICS(GRAND_QC_RUN.out.grand_qc_output)
 
