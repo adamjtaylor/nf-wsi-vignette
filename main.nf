@@ -10,8 +10,8 @@ params.foundation = false
 params.huggingface_hub_path = "/Users/ataylor/.cache/huggingface"
 // Model can be one of UNI, Prov-GigaPath, H-optimus-0
 params.model = "H-optimus-0"
-
-
+params.td_model = "https://zenodo.org/records/14507273/files/Tissue_Detection_MPP10.pth"
+params.qc_model = "https://zenodo.org/records/14041538/files/GrandQC_MPP15.pth"
 
 include { GRAND_QC } from './workflows/grand_qc.nf'
 include { TIA_TOOLBOX } from './workflows/tia_toolbox.nf'
@@ -62,7 +62,15 @@ profile: ${workflow.profile}
 
     // Run GrandQC
     if (params.grand_qc) {
-        GRAND_QC(image_ch)
+
+        // Get the models
+        Channel.of(
+            [
+                file(params.td_model),
+                file(params.qc_model) 
+            ]
+        ).set { grand_qc_models }
+        GRAND_QC(image_ch, grand_qc_models)
     }
 
     // Run TIA Toolbox

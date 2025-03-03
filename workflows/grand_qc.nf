@@ -1,4 +1,3 @@
-include { GRAND_QC_GET_MODELS } from '../modules/grand_qc_get_models'
 include { GRAND_QC_RUN } from '../modules/grand_qc_run'
 include { GRAND_QC_METRICS } from '../modules/grand_qc_metrics'
 include { GRAND_QC_METRICS_MERGE } from '../modules/grand_qc_metrics'
@@ -7,19 +6,9 @@ include { GRAND_QC_REPORT } from '../modules/grand_qc_report'
 workflow GRAND_QC {
     take:
     image_ch
+    grand_qc_models
 
     main:
-
-    // Get the models
-    //GRAND_QC_GET_MODELS()
-
-    Channel.of(
-        [
-            file('https://zenodo.org/records/14507273/files/Tissue_Detection_MPP10.pth'), 
-            file('https://zenodo.org/records/14041538/files/GrandQC_MPP15.pth')
-        ]
-    ).set { grand_qc_models }
-
 
     grand_qc_models.view()
 
