@@ -38,7 +38,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/wsi_tis_detect.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir td_model
+        --model_dir td_model/
 
     echo "Tissue detection complete"
 
@@ -46,7 +46,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/main.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir qc_model
+        --model_dir qc_model/
 
     echo "QC model complete"
     """
