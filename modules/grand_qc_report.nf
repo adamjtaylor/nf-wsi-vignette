@@ -1,5 +1,5 @@
 process GRAND_QC_REPORT {
-    container 'python:3.12-slim-bookworm'
+    container 'linuxserver/yq'
 
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
