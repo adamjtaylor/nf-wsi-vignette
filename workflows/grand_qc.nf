@@ -11,10 +11,17 @@ workflow GRAND_QC {
     main:
 
     // Get the models
-    GRAND_QC_GET_MODELS()
+    //GRAND_QC_GET_MODELS()
+
+    Channel.of(
+        [
+            file('https://zenodo.org/records/14507273/files/Tissue_Detection_MPP10.pth'), 
+            file('https://zenodo.org/records/14041538/files/GrandQC_MPP15.pth')
+        ]
+    ).set { grand_qc_models }
 
     // Run GRAND_QC
-    GRAND_QC_RUN(image_ch, GRAND_QC_GET_MODELS.out.grand_qc_models)
+    GRAND_QC_RUN(image_ch, grand_qc_models)
 
     GRAND_QC_METRICS(GRAND_QC_RUN.out.grand_qc_output)
 
