@@ -1,5 +1,5 @@
 process GRAND_QC_REPORT {
-    container 'apteno/alpine-jq'
+    container 'python:3.12-slim-bookworm'
 
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
