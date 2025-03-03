@@ -1,4 +1,5 @@
 process EMBEDDING_REPORT {
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
     tuple val(meta), 
