@@ -1,19 +1,22 @@
 process GRAND_QC_RUN {
 
-    container "ghcr.io/adamjtaylor/grandqc:latest"
+    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
     conda "/Users/ataylor/mambaforge/envs/grandqc"
-    maxForks 2
+    label 'GPU'
 
     publishDir "${params.outdir}/${meta.id}/grand_qc/", mode: 'copy'
 
     input:
     tuple val(meta), path(image)
+    tuple path(td_model), path(qc_model)
 
     output:
     tuple val(meta), 
     path("output_images/maps_qc/*"), 
     path("output_images/mask_qc/*"), 
     path("output_images/overlays_qc/*"), 
+    // Not outputting the tissue mask for now as it has a clash with the QC mask
+    // as Nextflow has case-insensitive file paths and it has the same name
     //path("output_images/tis_det_mask/*"), 
     path("output_images/tis_det_mask_col/*"), 
     path("output_images/tis_det_overlay/*"), 
@@ -26,12 +29,16 @@ process GRAND_QC_RUN {
     mkdir input_images
     # Copy the input image to the temporary directory
     cp ${image} input_images/
+    
+    mkdir -p td_model qc_model
+    cp ${td_model} td_model/
+    cp ${qc_model} qc_model/
 
     # Run tissue detection first
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/wsi_tis_detect.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${projectDir}/grandqc/models/td/
+        --model_dir td_model/
 
     echo "Tissue detection complete"
 
@@ -39,7 +46,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/main.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${projectDir}/grandqc/models/qc/
+        --model_dir qc_model/
 
     echo "QC model complete"
     """

@@ -1,3 +1,4 @@
 [submodule "grandqc"]
 	path = grandqc
-	url = https://github.com/cpath-ukk/grandqc
+	url = https://github.com/adamjtaylor/grandqc
+	branch = nextfllow-compatiable
