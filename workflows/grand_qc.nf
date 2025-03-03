@@ -20,6 +20,9 @@ workflow GRAND_QC {
         ]
     ).set { grand_qc_models }
 
+
+    grand_qc_models.view()
+
     // Run GRAND_QC
     GRAND_QC_RUN(image_ch, grand_qc_models)
 

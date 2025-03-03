@@ -8,7 +8,7 @@ process GRAND_QC_RUN {
 
     input:
     tuple val(meta), path(image)
-    tuple path(td_model_dir), path(qc_model_dir)
+    tuple path(td_model), path(qc_model)
 
     output:
     tuple val(meta), 
@@ -29,12 +29,16 @@ process GRAND_QC_RUN {
     mkdir input_images
     # Copy the input image to the temporary directory
     cp ${image} input_images/
+    
+    mkdir -p td_model qc_model
+    cp ${td_model} td_model/
+    cp ${qc_model} qc_model/
 
     # Run tissue detection first
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/wsi_tis_detect.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${td_model_dir}
+        --model_dir td_model
 
     echo "Tissue detection complete"
 
@@ -42,7 +46,7 @@ process GRAND_QC_RUN {
     python ${projectDir}/grandqc/01_WSI_inference_OPENSLIDE_QC/main.py \
         --slide_folder ./input_images \
         --output_dir output_images \
-        --model_dir ${qc_model_dir}
+        --model_dir qc_model
 
     echo "QC model complete"
     """
