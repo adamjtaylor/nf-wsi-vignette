@@ -1,5 +1,5 @@
 process GRAND_QC_REPORT {
-    container 'ubuntu:jammy'
+    container 'apteno/alpine-jq'
 
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
