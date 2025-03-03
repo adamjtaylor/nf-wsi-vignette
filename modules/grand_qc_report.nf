@@ -1,5 +1,5 @@
 process GRAND_QC_REPORT {
-    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/grandqc:latest'
+    container 'ubuntu:jammy'
 
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
