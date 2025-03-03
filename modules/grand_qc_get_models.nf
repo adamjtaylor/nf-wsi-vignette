@@ -7,8 +7,8 @@ process GRAND_QC_GET_MODELS {
     script:
     """
     mkdir -p td qc
-    curl -o td/ https://zenodo.org/records/14507273/files/Tissue_Detection_MPP10.pth
-    curl -o qc/ https://zenodo.org/records/14041538/files/GrandQC_MPP15.pth
+    curl -L -# -o td/Tissue_Detection_MPP10.pth https://zenodo.org/records/14507273/files/Tissue_Detection_MPP10.pth
+    curl -L -# -o qc/GrandQC_MPP15.pth https://zenodo.org/records/14041538/files/GrandQC_MPP15.pth
     """
 
     stub:
