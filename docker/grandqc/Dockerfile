@@ -6,9 +6,8 @@ RUN micromamba install -y -n base -f /tmp/conda.yml \
     && echo ">> CONDA_LOCK_START" \
     && cat environment.lock \
     && echo "<< CONDA_LOCK_END" \
-    && micromamba clean -a -y \
-    # Clone the grandqc repository nextflow-compatible branch
-    && apt-get update && apt-get install --yes git \
+    && micromamba clean -a -y
+RUN apt-get update && apt-get install --yes git \
     && git clone --branch nextflow-compatible https://github.com/adamjtaylor/grandqc.git
 USER root
 ENV PATH="$MAMBA_ROOT_PREFIX/bin:$PATH"
