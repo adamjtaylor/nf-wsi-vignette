@@ -12,7 +12,7 @@
 
 # Ignore directories
 work/
-results/
+results*/
 scratch/
 
 # Ignore cpython files

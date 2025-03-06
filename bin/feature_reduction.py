@@ -119,17 +119,27 @@ resolution = 0.5
 labels = leiden_clustering(igraph_graph, resolution=resolution)
 num_clusters = len(np.unique(labels))
 
-# Reduce resolution incrementally until we get <= 5 clusters
-while num_clusters > 5 and resolution > 0.1:
-    resolution -= 0.1
-    labels = leiden_clustering(igraph_graph, resolution=resolution)
-    num_clusters = len(np.unique(labels))
+# Binary search approach to find resolution that gives exactly 5 clusters
+min_resolution = 0.1
+max_resolution = 1.0
+max_iterations = 20  # Prevent infinite loops
+iteration = 0
 
-# If we don't have enough clusters, increase resolution
-while num_clusters < 5 and resolution < 1.0:
-    resolution += 0.1
+while num_clusters != 5 and iteration < max_iterations:
+    if num_clusters > 5:
+        # Too many clusters, decrease resolution
+        max_resolution = resolution
+        resolution = (resolution + min_resolution) / 2
+    else:
+        # Too few clusters, increase resolution
+        min_resolution = resolution
+        resolution = (resolution + max_resolution) / 2
+
     labels = leiden_clustering(igraph_graph, resolution=resolution)
     num_clusters = len(np.unique(labels))
+    iteration += 1
+
+print(f"Final resolution: {resolution:.3f} with {num_clusters} clusters")
 
 plt.figure()
 plt.scatter(reduced_2d[:, 0], reduced_2d[:, 1], c=labels, cmap="tab10", s=1, alpha=0.9)
@@ -317,11 +327,14 @@ for cluster in clusters:
     patch_centroids += np.array(patch_shape) // 2
 
     # Use TIAToolbox patch extractor
+
+    expanded_patch_size = int(patch_shape[0] * 2.5)
+
     patch_extractor = patchextraction.get_patch_extractor(
         input_img=wsi,
         locations_list=patch_centroids,
         method_name="point",
-        patch_size=patch_shape,
+        patch_size=expanded_patch_size,  # Extract 3x larger patches
         resolution=0.5,
         units="mpp",
     )
@@ -387,16 +400,32 @@ for row, (cluster, patches) in enumerate(patches_per_cluster.items()):
         )
 
         ax.imshow(framed_patch)
+        # Put a rectanle the size of patch_size in the center of the image
+        # Account for the padding above
+        rect = mpl.patches.Rectangle(
+            (
+                framed_patch.shape[1] // 2
+                - patch_shape[1] // 2,  # Center X - Half Width
+                framed_patch.shape[0] // 2
+                - patch_shape[0] // 2,  # Center Y - Half Height
+            ),
+            patch_shape[0],
+            patch_shape[1],
+            linewidth=0.75,
+            edgecolor="black",
+            facecolor="none",
+        )
+        ax.add_patch(rect)
         # Add a patch label to the patch based on labels_text
         # label_text is the number of patches wide
         # label should be top left corner on  the patch
         ax.text(
-            0, -15, labels_text[patch_counter], fontsize=6, color="black", weight="bold"
+            0, -30, labels_text[patch_counter], fontsize=6, color="black", weight="bold"
         )
         if col == 0:
             ax.text(
-                -50,
-                250,
+                -100,
+                framed_patch.shape[0],
                 f"Cluster {cluster}",
                 fontsize=6,
                 rotation=90,
@@ -404,12 +433,6 @@ for row, (cluster, patches) in enumerate(patches_per_cluster.items()):
             )
         ax.axis("off")
         patch_counter += 1
-
-    # Add cluster label on the leftmost image in each row
-    axes[row, 0].set_ylabel(
-        f"Cluster {cluster}", fontsize=12, rotation=90, labelpad=20, weight="bold"
-    )
-
 
 plt.tight_layout()
 plt.savefig("extracted_patches.png", bbox_inches="tight", pad_inches=0.2)
