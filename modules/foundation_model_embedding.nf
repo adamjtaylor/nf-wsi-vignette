@@ -15,7 +15,7 @@ process EMBEDDING {
 
     script:
     """
-    foundation_model.py ${image} $params.huggingface_hub_path $params.model
+    foundation_model.py ${image} $params.huggingface_hub_path $params.model ${qc_mask}
     """
 
     stub:
