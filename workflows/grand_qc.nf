@@ -6,14 +6,11 @@ include { GRAND_QC_REPORT } from '../modules/grand_qc_report'
 workflow GRAND_QC {
     take:
     image_ch
-    grand_qc_models
 
     main:
 
-    grand_qc_models.view()
-
     // Run GRAND_QC
-    GRAND_QC_RUN(image_ch, grand_qc_models)
+    GRAND_QC_RUN(image_ch, params.td_model, params.qc_model)
 
     GRAND_QC_METRICS(GRAND_QC_RUN.out.grand_qc_output)
 
@@ -25,5 +22,12 @@ workflow GRAND_QC {
 
     // Run the GRAND_QC_REPORT
     GRAND_QC_REPORT(COMBINED)
+
+    // Emit the qc_mask
+    // This is the third item in the GRAND_QC_RUN.out.grand_qc_output tuple
+    // Also incliude the first item in the tuple, which is the meta
+
+    emit:
+    qc_mask = GRAND_QC_RUN.out.grand_qc_output.map { [it[0], it[2]] }
 
 }

@@ -63,19 +63,16 @@ profile: ${workflow.profile}
     // Run GrandQC
     if (params.grand_qc) {
 
-        // Get the models
-        Channel.of(
-            [
-                file(params.td_model),
-                file(params.qc_model) 
-            ]
-        ).set { grand_qc_models }
-        GRAND_QC(image_ch, grand_qc_models)
+        GRAND_QC(image_ch)
+
+        // Join the image_ch and GRAN_QC.out.qc_mask on meta.id 
+        // Make a channel that is tuple of meta, image, qc_mask
+        foundation_input_ch = image_ch.join(GRAND_QC.out.qc_mask, by: [0]).map { [it[0], it[1], it[2]] }
     }
 
     // Run TIA Toolbox
     if (params.foundation) {
-        TIA_TOOLBOX(image_ch)
+        TIA_TOOLBOX(foundation_input_ch)
     }
     
 }

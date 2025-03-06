@@ -8,7 +8,7 @@ process EMBEDDING {
     publishDir "results/${meta.id}/foundation_model", mode: 'copy', pattern: "*.{npy,dat}"
 
     input:
-    tuple val(meta), path(image)
+    tuple val(meta), path(image), path(qc_mask)
 
     output:
     tuple val(meta), path(image), path("wsi_features/0.features.0.npy"), path("wsi_features/0.position.npy"), path("wsi_features/file_map.dat"), emit: wsi_features

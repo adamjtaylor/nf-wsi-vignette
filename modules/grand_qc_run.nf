@@ -8,7 +8,8 @@ process GRAND_QC_RUN {
 
     input:
     tuple val(meta), path(image)
-    tuple path(td_model), path(qc_model)
+    each path(td_model)
+    each path(qc_model)
 
     output:
     tuple val(meta), 
