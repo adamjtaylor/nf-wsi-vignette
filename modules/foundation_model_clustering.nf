@@ -3,7 +3,7 @@ process CLUSTERING {
     container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
     conda "/Users/ataylor/mambaforge/envs/tiatoolbox"
 
-    publishDir "results/${meta.id}/${params.model}/feature_reduction", mode: 'copy'
+    publishDir "results/${meta.id}/${params.model}", mode: 'copy'
 
     input:
     tuple val(meta), path(image), path(features), path(positions), path(file_map)
