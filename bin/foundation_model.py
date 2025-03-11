@@ -19,6 +19,7 @@ from tiatoolbox.models.engine.semantic_segmentor import (
 )
 from tiatoolbox.utils.misc import download_data
 from tiatoolbox.wsicore.wsireader import WSIReader
+import cv2
 
 # import cv2
 
@@ -54,33 +55,27 @@ model_dir = sys.argv[2]
 # model_dir = "/Users/ataylor/.cache/huggingface"
 model = sys.argv[3]
 
-# qc_mask_path = sys.argv[4]
-#
-# # Load the mask and find the tissue region
-# qc_mask = cv2.imread(qc_mask_path, cv2.IMREAD_GRAYSCALE)
-#
-# # Tissue region is where the mask is not 7
-# tissue_region = np.where(qc_mask != 7)
-#
-# # Mask is at 1.5 mpp resolution
-# qc_mask_mpp = 1.5
-#
-# # we need to scale this to match the resolution of the WSI
-# # we will use the WSIReader to get the resolution of the WSI
-# wsi_reader = WSIReader(wsi_path)
-# wsi_mpp = wsi_reader.mpp
-# scale_factor = wsi_mpp / qc_mask_mpp
-#
-# # Scale the tissue region so it has the same dimensions as the WSI
-# new_shape = (
-#     int(tissue_region.shape[1] * scale_factor),
-#     int(tissue_region.shape[0] * scale_factor),
-# )
-#
-# # Resize using OpenCV
-# tissue_region_scaled = cv2.resize(
-#     tissue_region, new_shape, interpolation=cv2.INTER_LINEAR
-# )
+# Load the QC mask with unchanged bit depth
+qc_mask_path = sys.argv[4]
+
+# if qc_mask_path is not null
+use_qc_mask = sys.argv[5].lower() in ('true', 't', 'yes', 'y', '1')
+print(f"Use QC Mask: {use_qc_mask}")
+if use_qc_mask:
+
+    qc_mask = cv2.imread(qc_mask_path, cv2.IMREAD_UNCHANGED)
+
+    # Ensure the mask only has values 0-7
+    if qc_mask.max() > 7:
+        raise ValueError("Mask should have values between 0 and 7")
+
+    # Convert to an 8-bit binary mask (255 for tissue, 0 for background)
+    tissue_region = np.where(qc_mask == 1, 255, 0).astype(np.uint8)
+
+    # Save as an 8-bit grayscale PNG
+    tissue_region_path = Path("tissue_region.png")
+    cv2.imwrite(str(tissue_region_path), tissue_region)
+
 
 # if the model is prov-gigapath then patch shape is 256x256
 if model == "Prov-GigaPath":
@@ -114,7 +109,7 @@ wsi_ioconfig = IOSegmentorConfig(
 print("Creating the feature extractor")
 extractor = DeepFeatureExtractor(
     model=model,
-    auto_generate_mask=True,
+    auto_generate_mask=False if use_qc_mask else True,
     batch_size=32,
     num_loader_workers=3,
     num_postproc_workers=3,
@@ -129,12 +124,21 @@ if __name__ == "__main__":
 
     # Run the feature extractor
     print("Running the feature extractor")
-    out = extractor.predict(
-        imgs=[wsi_path],
-        mode="wsi",
-        ioconfig=wsi_ioconfig,
-        save_dir=str(save_dir),  # Ensure it's a string
-        device=device,
-    )
-
+    if use_qc_mask:
+        out = extractor.predict(
+            imgs=[wsi_path],
+            masks=[tissue_region_path],
+            mode="wsi",
+            ioconfig=wsi_ioconfig,
+            save_dir=str(save_dir),  # Ensure it's a string
+            device=device,
+        )
+    else:
+        out = extractor.predict(
+            imgs=[wsi_path],
+            mode="wsi",
+            ioconfig=wsi_ioconfig,
+            save_dir=str(save_dir),  # Ensure it's a string
+            device=device,
+        )
     print("Feature extraction completed")
