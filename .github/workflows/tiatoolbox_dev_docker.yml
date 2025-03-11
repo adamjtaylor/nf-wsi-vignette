@@ -38,7 +38,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/tiatoolbox
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/tiatoolbox-dev
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}} 
@@ -56,5 +56,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}/tiatoolbox:buildcache
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}/tiatoolbox-dev:buildcache
           cache-to: type=inline
