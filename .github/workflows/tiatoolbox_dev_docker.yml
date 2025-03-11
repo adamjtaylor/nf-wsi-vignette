@@ -3,9 +3,8 @@ name: TIAToolbox Docker Build
 on:
   push:
     paths:
-      - "docker/tiatoolbox/**"
-      - "conda/tiatoolbox.yml"
-      - ".github/workflows/tiatoolbox_docker.yml"
+      - "docker/tiatoolbox-dev/**"
+      - ".github/workflows/tiatoolbox_dev_docker.yml"
 
 env:
   REGISTRY: ghcr.io
