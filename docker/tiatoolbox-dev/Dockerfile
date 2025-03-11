@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openslide-tools \
     python3.12 \
     python3.12-venv \
-    python3.12-dev \
+    python3.12-dev &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add env to PATH
