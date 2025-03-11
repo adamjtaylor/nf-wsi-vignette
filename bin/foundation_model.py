@@ -57,18 +57,24 @@ model = sys.argv[3]
 
 # Load the QC mask with unchanged bit depth
 qc_mask_path = sys.argv[4]
-qc_mask = cv2.imread(qc_mask_path, cv2.IMREAD_UNCHANGED)
 
-# Ensure the mask only has values 0-7
-if qc_mask.max() > 7:
-    raise ValueError("Mask should have values between 0 and 7")
+# if qc_mask_path is not null
+use_qc_mask = sys.argv[5].lower() in ('true', 't', 'yes', 'y', '1')
+if use_qc_mask:
 
-# Convert to an 8-bit binary mask (255 for tissue, 0 for background)
-tissue_region = np.where(qc_mask == 1, 255, 0).astype(np.uint8)
+    qc_mask = cv2.imread(qc_mask_path, cv2.IMREAD_UNCHANGED)
 
-# Save as an 8-bit grayscale PNG
-tissue_region_path = Path("tissue_region.png")
-cv2.imwrite(str(tissue_region_path), tissue_region)
+    # Ensure the mask only has values 0-7
+    if qc_mask.max() > 7:
+        raise ValueError("Mask should have values between 0 and 7")
+
+    # Convert to an 8-bit binary mask (255 for tissue, 0 for background)
+    tissue_region = np.where(qc_mask == 1, 255, 0).astype(np.uint8)
+
+    # Save as an 8-bit grayscale PNG
+    tissue_region_path = Path("tissue_region.png")
+    cv2.imwrite(str(tissue_region_path), tissue_region)
+
 
 # if the model is prov-gigapath then patch shape is 256x256
 if model == "Prov-GigaPath":
@@ -102,7 +108,7 @@ wsi_ioconfig = IOSegmentorConfig(
 print("Creating the feature extractor")
 extractor = DeepFeatureExtractor(
     model=model,
-    auto_generate_mask=False,
+    auto_generate_mask=False if use_qc_mask else True,
     batch_size=32,
     num_loader_workers=3,
     num_postproc_workers=3,
@@ -117,13 +123,21 @@ if __name__ == "__main__":
 
     # Run the feature extractor
     print("Running the feature extractor")
-    out = extractor.predict(
-        imgs=[wsi_path],
-        masks=[tissue_region_path],
-        mode="wsi",
-        ioconfig=wsi_ioconfig,
-        save_dir=str(save_dir),  # Ensure it's a string
-        device=device,
-    )
-
+    if use_qc_mask:
+        out = extractor.predict(
+            imgs=[wsi_path],
+            masks=[tissue_region_path],
+            mode="wsi",
+            ioconfig=wsi_ioconfig,
+            save_dir=str(save_dir),  # Ensure it's a string
+            device=device,
+        )
+    else:
+        out = extractor.predict(
+            imgs=[wsi_path],
+            mode="wsi",
+            ioconfig=wsi_ioconfig,
+            save_dir=str(save_dir),  # Ensure it's a string
+            device=device,
+        )
     print("Feature extraction completed")
