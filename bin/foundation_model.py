@@ -60,6 +60,7 @@ qc_mask_path = sys.argv[4]
 
 # if qc_mask_path is not null
 use_qc_mask = sys.argv[5].lower() in ('true', 't', 'yes', 'y', '1')
+print(f"Use QC Mask: {use_qc_mask}")
 if use_qc_mask:
 
     qc_mask = cv2.imread(qc_mask_path, cv2.IMREAD_UNCHANGED)
