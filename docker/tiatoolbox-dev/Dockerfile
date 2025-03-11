@@ -11,6 +11,7 @@ RUN apt-get update && \
     apt-get install libpython3.12-de -y &&\
     apt-get install python3.12-dev -y &&\
     apt-get install build-essential -y &&\
+    apt-get install git -y &&\
     apt-get clean
 
 # Add env to PATH
