@@ -11,12 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libopenjp2-7-dev \
     libopenjp2-tools \
-    openslide-tools && \
-    add-apt-repository ppa:deadsnakes/ppa -y && apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3.12-venv \
-    python3.12-dev \
-    libpython3.12-dev && \
+    openslide-tools \
+    python3.10 \
+    python3.10-venv \
+    python3.10-dev \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add env to PATH
