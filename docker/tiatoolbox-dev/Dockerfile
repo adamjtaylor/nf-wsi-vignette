@@ -3,16 +3,21 @@ FROM ubuntu:22.04 AS builder-image
 # Avoid tzdata blocking the build
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install python3.12
-RUN apt-get update && \
-    apt install software-properties-common -y &&\
-    add-apt-repository ppa:deadsnakes/ppa -y && apt update &&\
-    apt-get install -y --no-install-recommends python3.12-venv &&\
-    apt-get install libpython3.12-de -y &&\
-    apt-get install python3.12-dev -y &&\
-    apt-get install build-essential -y &&\
-    apt-get install git -y &&\
-    apt-get clean
+# Install Python 3.12 and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    build-essential \
+    git \
+    libgl1 \
+    libopenjp2-7-dev \
+    libopenjp2-tools \
+    openslide-tools && \
+    add-apt-repository ppa:deadsnakes/ppa -y && apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3.12-venv \
+    python3.12-dev \
+    libpython3.12-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add env to PATH
 RUN python3.12 -m venv /venv
@@ -28,6 +33,7 @@ RUN git clone --branch develop https://github.com/TissueImageAnalytics/tiatoolbo
 # Install TIAToolbox dependencies
 WORKDIR /workspace/tiatoolbox
 RUN pip install -r requirements/requirements_dev.txt
+RUN pip install huggingface-hub igraph leidenalg
 
 # Install TIAToolbox in editable mode
 RUN pip install -e .
