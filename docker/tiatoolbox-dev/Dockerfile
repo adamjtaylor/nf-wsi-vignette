@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS builder-image
+FROM ubuntu:24.04 AS builder-image
 
 # Avoid tzdata blocking the build
 ENV DEBIAN_FRONTEND=noninteractive
@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libopenjp2-7-dev \
     libopenjp2-tools \
     openslide-tools \
-    python3.10 \
-    python3.10-venv \
-    python3.10-dev \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add env to PATH
