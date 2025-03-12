@@ -1,4 +1,6 @@
 process GRAND_QC_REPORT {
+    container 'linuxserver/yq'
+
     publishDir "${params.outdir}/${meta.id}/report/", mode: 'copy'
     input:
     tuple val(meta), 
@@ -19,7 +21,7 @@ process GRAND_QC_REPORT {
 """
 # Ensure the input paths end up in the publishDir
 mkdir -p images
-cp ${qc_map} ${qc_overlay} ${tissue_mask_colored} ${tissue_overlay} ${thumbnail} "images/"
+mv ${qc_map} ${qc_overlay} ${tissue_mask_colored} ${tissue_overlay} ${thumbnail} "images/"
 
 # Generate a combined Markdown table with Stats & Metrics
 (

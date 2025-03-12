@@ -6,11 +6,14 @@ include { GRAND_QC_REPORT } from '../modules/grand_qc_report'
 workflow GRAND_QC {
     take:
     image_ch
+    grand_qc_models
 
     main:
 
+    grand_qc_models.view()
+
     // Run GRAND_QC
-    GRAND_QC_RUN(image_ch)
+    GRAND_QC_RUN(image_ch, grand_qc_models)
 
     GRAND_QC_METRICS(GRAND_QC_RUN.out.grand_qc_output)
 
