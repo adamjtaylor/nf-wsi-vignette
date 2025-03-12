@@ -52,7 +52,7 @@ if device == "mps":
 wsi_path = sys.argv[1]
 model_dir = sys.argv[2]
 # model_dir = "/Users/ataylor/.cache/huggingface"
-model = sys.argv[3]
+model_name = sys.argv[3]
 
 # qc_mask_path = sys.argv[4]
 #
@@ -83,7 +83,7 @@ model = sys.argv[3]
 # )
 
 # if the model is prov-gigapath then patch shape is 256x256
-if model == "Prov-GigaPath":
+if model_name == "Prov-GigaPath":
     patch_shape = [256, 256]
 else:
     patch_shape = [224, 224]
@@ -99,7 +99,7 @@ os.environ["HF_HOME"] = model_dir
 login(os.getenv("HF_TOKEN"))
 
 print("Downloading the model")
-model = TimmBackbone(backbone=model, pretrained=True)
+model = TimmBackbone(backbone=model_name, pretrained=True)
 
 print("Creating the WSI IO config")
 wsi_ioconfig = IOSegmentorConfig(
@@ -138,3 +138,24 @@ if __name__ == "__main__":
     )
 
     print("Feature extraction completed")
+
+    # If H0-mini reshape the features
+    if model_name == "H0-mini":
+        features = np.load('wsi_features/0.features.0.npy')
+
+        n, d = features.shape  # Expecting (n, 200448)
+
+        if d != 261 * 768:
+            raise ValueError(f"Unexpected feature dimension {d}, cannot reshape to (n, 261, 768)")
+
+        # Reshape back to (n, 261, 768)
+        reshaped_features = features.reshape(n, 261, 768)
+
+        # Extract CLS token features (n, 768)
+        cls_features = reshaped_features[:, 0, :]
+
+        # Overwrite the saved features
+        np.save('wsi_features/0.features.0.npy', cls_features)
+        print(f"Saved CLS token features with shape {cls_features.shape} to 'wsi_features/0.features0.npy'")
+    else:
+        print(f'Model {model_name} does not require reshaping')

@@ -42,7 +42,7 @@ profile: ${workflow.profile}
 """
 
     // Check if model is valid
-    if (params.model != "UNI" && params.model != "Prov-GigaPath" && params.model != "H-optimus-0") {
+    if (params.model != "UNI" && params.model != "Prov-GigaPath" && params.model != "H-optimus-0" && params.model != "H0-mini") {
         log.error "Invalid model specified. Please choose from UNI, Prov-GigaPath, H-optimus-0"
         exit 1
     }

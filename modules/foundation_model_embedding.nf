@@ -1,7 +1,8 @@
 process EMBEDDING {
-    container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
+    //container 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest'
+    container { params.dev ? 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox-dev:latest' : 'ghcr.io/adamjtaylor/nf-wsi-vignette/tiatoolbox:latest' }
     containerOptions '-v ~/.cache/huggingface:/root/.cache/huggingface'
-    conda "/Users/ataylor/mambaforge/envs/tiatoolbox"
+    conda {params.dev ? "/Users/ataylor/mambaforge/envs/tiatoolbox-dev" : "/Users/ataylor/mambaforge/envs/tiatoolbox"}
     label 'GPU'
     secret 'HF_TOKEN'
     
